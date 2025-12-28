@@ -1,0 +1,91 @@
+
+QA: What is Redis: 
+======================
+Redis stands for Remote Dictionary Server.
+It is a high-performance, in-memory data store used mainly as a cache, Temporary database, and message broker. Redis stores data in RAM (outside application memory) and serves it with microsecond latency.
+
+what is in-memory meant?
+Redis is called in-memory because its working dataset is stored and accessed from RAM, with disk used only for optional persistence and recovery.
+
+why RAM is fast?
+Core Idea: Redis stores data in memory (RAM) instead of disk, making data access extremely fast.
+
+what is RAM in this?
+Your machine/server has one big RAM pool, managed by the operating system. Redis stores data in RAM owned by the Redis server process, not in the application’s memory.
+
+Can Redis RAM store only limited data?
+Yes. Redis can store only as much data as the available RAM allocated to the Redis instance. Redis RAM is limited, but Redis manages this using memory limits, eviction policies, and key expiration.
+1.RAM Is Finite: Redis stores its working dataset in RAM
+
+⚙️ How Redis Handles Limited RAM?
+1. You can control this using: "maxmemory" configuration.
+2. Eviction Policies: When memory is full, Redis removes data automatically based on policy.
+3️. TTL (Time-To-Live): Keys can expire automatically
+
+
+Why Redis is single-threaded but fast?
+Redis is fast because it avoids locks, uses in-memory data, and relies on an efficient event-driven model instead of multiple threads.
+✅ 1. Everything Is In Memory: Redis works on RAM only
+✅ 2. No Locks, No Contention: One thread → no concurrent writes
+✅ 3. Event-Driven, Non-Blocking I/O: Redis uses an event loop (like Node.js): Thousands of clients can be handled without blocking.
+	FLow: Client requests → queued → processed one by one
+
+Q: Why Redis Does NOT Need Multiple Threads?
+Redis scales by:
+1. Vertical scaling (faster CPU)
+2. Horizontal scaling: Replication: Clustering (sharding)
+Not by adding threads. If Redis were multi-threaded: Lock contention on shared data
+
+Q: 🧩 Redis Storage Structures (Very Important ⭐)
+
+In Redis, a key-value pair is a data structure that consists of a unique key, which is used to identify the data, and a value, which is the data itself. Key-value pairs are the most basic data structure in Redis, and they are used to store and manage data in the database.
+
+Redis supports a wide range of data types for keys and values, including strings, hashes, lists, sets, and sorted sets. Redis provides a rich set of commands for working with key-value pairs, such as SET, GET, and DEL for strings, HSET, HGET, and HDEL for hashes, and LPUSH, LGET, and LREM for lists. These commands enable developers to store, retrieve, and manipulate data in Redis efficiently and easily.
+
+
+Redis is not just key-value — it’s a data structure server.
+1️. String (Most Used): it stores- text, numbers, JSON, binary
+2. Hash (Object Storage): it stores- field-value pairs
+3. List (Ordered Collection): it stores- ordered values (linked list)
+4. Set (Unique Collection): it stores- unordered unique values
+5. Sorted Set (Ranking): it stores values with scores
+6. Bitmap: it stores- bit-level flags
+7. Stream (Event Log): it stores- append-only event data
+------------------------------------------------------------------
+
+🔹String (Simplest form): Used for: flags, counters, tokens
+"user:name" → "Rahul"
+
+
+Redis CLI:
+SET user:name "Rahul"
+GET user:name
+
+
+Stored in memory as:
+Key: "user:name"
+Value: "Rahul"
+------------------------------------------------------------------------
+
+🔹Hash (Most common – like Java Map): Used for: storing objects
+
+"user:101" → {
+   "name": "Rahul",
+   "age": "30",
+   "city": "Delhi"
+}
+
+
+Redis CLI:
+HSET user:101 name Rahul age 30 city Delhi
+HGETALL user:101
+
+
+How Redis sees it:
+Key: user:101
+Value (Hash):
+  name  → Rahul
+  age   → 30
+  city  → Delhi
+
+👉 Think of this as: Map<String, String>

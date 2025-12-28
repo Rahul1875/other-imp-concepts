@@ -1,0 +1,232 @@
+MySQL Concepts -1 :
+-----------------
+
+1.Select department,total salary with respect to a department from employee table where total salary greater than 800000 order by Total_Salary descending.
+
+Select DEPARTMENT,sum(SALARY) Total_Salary from employee group by DEPARTMENT having sum(SALARY) >800000 order by Total_Salary desc
+
+2. Get department,no of employees in a department,total salary with respect to a department from employee table order by total salary descending.
+
+Select DEPARTMENT,count(FIRST_NAME),sum(SALARY) Total_Salary from employee group by DEPARTMENT order by Total_Salary descending
+
+3. Select employee details from employee table if data exists in incentive table ?
+
+select * from EMPLOYEE where exists (select * from INCENTIVES)
+
+4.  Select 20 % of salary from John , 10% of Salary for Roy and for other 15 % of salary from employee table
+
+SELECT FIRST_NAME, CASE FIRST_NAME WHEN 'John' THEN SALARY * .2 WHEN 'Roy' THEN SALARY * .10 ELSE SALARY * .15 END "Deduced_Amount" FROM EMPLOYEE
+
+5.  Delete employee data from employee table who got incentives in incentive table
+
+delete from EMPLOYEE where EMPLOYEE_ID in (select EMPLOYEE_REF_ID from INCENTIVES)
+ 
+6. Select Last Name from employee table which contain only numbers
+
+Select * from EMPLOYEE where lower(LAST_NAME)=upper(LAST_NAME)
+
+7. Update incentive table where employee name is 'John'
+
+update INCENTIVES set INCENTIVE_AMOUNT='9000' where EMPLOYEE_REF_ID=(select EMPLOYEE_ID from EMPLOYEE where FIRST_NAME='John' )
+
+8. Select first_name, incentive amount from employee and incentives table for those employees who have incentives and incentive amount greater than 3000
+
+Select FIRST_NAME,INCENTIVE_AMOUNT from employee A inner join incentives B on A.EMPLOYEE_ID=B.EMPLOYEE_REF_ID and INCENTIVE_AMOUNT >3000
+
+9.  Second Highest Salary in MySQL:
+
+1. SELECT MAX(salary) FROM Employee WHERE Salary NOT IN ( SELECT Max(Salary) FROM Employee);
+2. SELECT MAX(Salary) From Employee WHERE Salary   <    ( SELECT Max(Salary) FROM Employee);
+
+3rd highest salary:
+---------------------
+SELECT name, salary FROM #Employee e1 WHERE 3-1 = (SELECT COUNT(DISTINCT salary) FROM #Employee e2 WHERE e2.salary > e1.salary)
+
+10.
+Some Queries:
+--------------------
+
+1. Select * from Employee where firstname in ('John','Roy')
+
+2. Select * from Employee where firstname like 'J%'
+
+3. Select * from Employee where firstname like 'rahul'  // rahul, Rahul RAHUL,
+
+4. select min(salary) from (Select * from Employee order by salary desc limit 2)a
+
+5. The underscore wildcard is used to match exactly one character:
+SELECT * FROM movies WHERE year_released LIKE '200_';
+
+6. SELECT * FROM movies WHERE year_released LIKE '[Rr][Aa][Hh][Uu][Ll]'
+
+
+MySQL Concepts -2 :
+-----------------
+
+1. Write syntax to set 2 fields(EMPLOYEE_ID,FIRST_NAME) as primary key in employee table
+
+ALTER TABLE EMPLOYEE add CONSTRAINT EMPLOYEE_PK PRIMARY KEY(EMPLOYEE_ID,FIRST_NAME)
+
+
+2. Write syntax to drop primary key on employee table
+
+Alter TABLE EMPLOYEE drop CONSTRAINT EMPLOYEE_PK;
+
+3.  Write Sql Syntax to create EMPLOYEE_REF_ID in INCENTIVES table as foreign key with respect to EMPLOYEE_ID in employee table
+
+ALTER TABLE INCENTIVES ADD CONSTRAINT INCENTIVES_FK FOREIGN KEY (EMPLOYEE_REF_ID) REFERENCES EMPLOYEE(EMPLOYEE_ID)
+
+4. Write SQL to drop foreign key on employee table
+
+ALTER TABLE INCENTIVES drop CONSTRAINT INCENTIVES_FK;
+
+5. Write create table syntax for employee table
+
+CREATE TABLE EMPLOYEE(
+EMPLOYEE_ID int NOT NULL,
+FIRST_NAME varchar(50) NULL,
+LAST_NAME varchar(50) NULL,
+SALARY decimal(18, 0) NULL,
+JOINING_DATE datetime2(7) default getdate(),
+DEPARTMENT varchar(50) NULL)
+
+
+MySQL Concepts -3 :
+-----------------
+
+1. diff btw UNION and UNION ALL
+
+UNION removes duplicate records (where all columns in the results are the same), UNION ALL does not.
+
+2.  What is SQL Injection ?
+
+SQL Injection is one of the the techniques uses by hackers to hack a website by injecting SQL commands in data fields.
+
+3. diff btw inner join and natural join
+
+One significant difference between INNER JOIN and NATURAL JOIN is the number of columns returned.
+
+Consider:
+
+TableA                           TableB
++------------+----------+        +--------------------+    
+|Column1     | Column2  |        |Column1  |  Column3 |
++-----------------------+        +--------------------+
+| 1          |  2       |        | 1       |   3      |
++------------+----------+        +---------+----------+
+
+
+SELECT * FROM TableA AS a INNER JOIN TableB AS b USING (Column1);
+SELECT * FROM TableA AS a INNER JOIN TableB AS b ON a.Column1 = b.Column1;
+
+The INNER JOIN of TableA and TableB on Column1 will return
++------------+-----------+---------------------+    
+| a.Column1  | a.Column2 | b.Column1| b.Column3|
++------------------------+---------------------+
+| 1          |  2        | 1        |   3      |
++------------+-----------+----------+----------+
+
+The NATURAL JOIN of TableA and TableB on Column1 will return:
+
+SELECT * FROM TableA NATURAL JOIN TableB
++------------+----------+----------+    
+|Column1     | Column2  | Column3  |
++-----------------------+----------+
+| 1          |  2       |   3      |
++------------+----------+----------+
+The repeated column is avoided.
+
+4.  DELETE , TRUNCATE and DROP Statement:
+
+==> The DELETE Statement is used to delete rows from a table. 
+
+Syntax: DELETE FROM table_name [WHERE condition];
+
+==> The SQL TRUNCATE command is used to delete all the rows from the table and free the space containing the table.
+
+Syntax: TRUNCATE TABLE table_name;
+
+Difference between DELETE and TRUNCATE Statements:
+-----------------------------------------------------
+DELETE Statement: This command deletes only the rows from the table based on the condition given in the where clause or deletes all the rows from the table if no condition is specified. But it does not free the space containing the table.
+
+==> TRUNCATE statement: This command is used to delete all the rows from the table and free the space containing the table
+
+The SQL DROP command is used to remove an object from the database. If you drop a table, all the rows in the table is deleted and the table structure is removed from the database. Once a table is dropped we cannot get it back, so be careful while using DROP command. When a table is dropped all the references to the table will not be valid.
+
+Syntax: DROP TABLE table_name;
+
+Outer join and inner join difference?
+------------------------------------------
+The major difference between inner and outer joins is that inner joins result in the intersection of two tables, whereas outer joins result in the union of two tables.
+
+There are three types of outer join in SQL.
+Left Outer Join
+Right Outer Join
+Full Outer Join
+
+Q: SQL vs  NoSQL:
+=========================
+    SQL databases are relational, and NoSQL databases are non-relational.
+    SQL databases use structured query language (SQL) and have a predefined schema. NoSQL databases have dynamic schemas for unstructured data.
+    SQL databases are vertically scalable, while NoSQL databases are horizontally scalable.
+    SQL databases are table-based, while NoSQL databases are document, key-value, graph, or wide-column stores.
+    SQL databases are better for multi-row transactions, while NoSQL is better for unstructured data like documents or JSON.
+
+Scalability is a system's ability to handle increasing workloads by adding resources, ensuring it remains performant and reliable as demand grows
+Notes: While horizontal scaling refers to adding additional nodes, vertical scaling describes adding more power to your current machines.
+
+In system design, reliability is the ability of a system to perform its intended functions consistently and without failure for a specified period under predefined conditions
+
+PostgreSQL provides advanced SQL querying, data integrity, and durability, making it suitable for complex applications and long-term data storage.
+
+Q: Cassnadra :  NoSQL Columnar Databases
+---------------------------------------------
+https://stackoverflow.com/questions/24949676/difference-between-partition-key-composite-key-and-clustering-key-in-cassandra
+
+There are four types of NoSQL Databases: Key-Value (KV) Stores, Document Stores, Column Family Data stores, and Graph Databases.
+ 
+
+Q: Data Consistency Models: ACID vs. BASE Explained
+
+1. The ACID model provides a consistent system, popular with SQL DB
+2. The BASE model provides high availability, popular with NoSQL DB
+
+
+BASE acronym breaks down:
+
+1. Basic Availability: Instead of making it compulsory for immediate consistency, BASE-modelled NoSQL databases will ensure the availability of data by spreading and replicating it across the nodes of the database cluster.
+
+2. Soft-state: Due to the lack of immediate consistency, the data values may change over time. Stores don’t have to be write-consistent.
+
+3. Eventual consistency:  The fact that BASE does not obligates immediate consistency but it does not mean that it never achieves it. However, until it does, the data reads are still possible.
+
+
+------------------------------------------
+Q: difference between mySQL vs postgreSQL
+
+MySQL is optimized for speed and simplicity, while PostgreSQL is optimized for complex queries, strong consistency, and advanced features.
+MySQL defaults to REPEATABLE READ for stronger consistency, while PostgreSQL defaults to READ COMMITTED for better concurrency.
+
+⚙️ Transaction & Concurrency
+MySQL:
+Uses locking (depends on engine like InnoDB)
+Simpler concurrency model
+
+PostgreSQL:
+Uses MVCC (Multi-Version Concurrency Control)
+Readers never block writers
+Excellent for high concurrency
+
+
+More Practice:
+======================
+
+https://learnsql.com/blog/sql-subquery-examples/
+
+
+
+Cassandra:
+========================
+https://www.edureka.co/blog/interview-questions/cassandra-interview-questions/
+

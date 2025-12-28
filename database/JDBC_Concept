@@ -1,0 +1,198 @@
+JDBC:
+
+==================
+What is JDBC ?
+
+JDBC is an acronym for Java Database Connectivity. It’s an advancement for ODBC ( Open Database Connectivity ). JDBC is an standard API specification developed in order to move data from frontend to backend. This API consists of classes and interfaces written in Java. It basically acts as an interface (not the one we use in Java) or channel between your Java program and databases.it establishes a link between the two so that a programmer could send data from Java code and store it in the database for future use.
+
+JDBC is an advancement for ODBC, ODBC being platform dependent had a lot of drawbacks. ODBC is written in C language.
+
+===============================================
+The executeQuery() method of Statement interface is used to execute queries of retrieving values from the database. This method returns the object of ResultSet that can be used to get all the records of a table.
+The executeUpdate(sql query) method of Statement interface is used to execute queries of updating/inserting .
+
+===============================================
+con.close()
+By closing connection, objects of Statement and ResultSet will be closed automatically.
+
+=================================================
+Statement interface
+
+The Statement interface provides methods to execute queries with the database. The statement interface is a factory of ResultSet i.e. it provides factory method to get the object of ResultSet.
+==================================================
+ResultSet interface
+
+The object of ResultSet maintains a cursor pointing to a row of a table. Initially, cursor points to before the first row.
+Example:
+ResultSet rs=stmt.executeQuery("select * from emp765");  
+//getting the record of 3rd row  
+rs.absolute(3);  
+System.out.println(rs.getString(1)+" "+rs.getString(2)+" "+rs.getString(3)); 
+
+
+===================================================
+PreparedStatement interface
+
+The PreparedStatement interface is a subinterface of Statement. It is used to execute parameterized query.
+Let's see the example of parameterized query:
+
+PreparedStatement stmt=con.prepareStatement("insert into Emp values(?,?)");  
+stmt.setInt(1,101);//1 specifies the first parameter in the query  
+
+stmt.setString(2,"Ratan");
+
+================================================
+Java ResultSetMetaData Interface
+
+The metadata means data about data i.e. we can get further information from the data.
+If you have to get metadata of a table like total number of column, column name, column type etc.
+
+/*
+PreparedStatement ps=con.prepareStatement("select * from emp");  
+ResultSet rs=ps.executeQuery();  
+ResultSetMetaData rsmd=rs.getMetaData();  
+  
+System.out.println("Total columns: "+rsmd.getColumnCount());  
+System.out.println("Column Name of 1st column: "+rsmd.getColumnName(1));  
+System.out.println("Column Type Name of 1st column: "+rsmd.getColumnTypeName(1));  
+*/
+
+=================================================
+Java DatabaseMetaData interface
+
+DatabaseMetaData interface provides methods to get meta data of a database such as database product name, database product version, driver name, name of total number of tables, name of total number of views etc.
+
+/*
+Connection con=DriverManager.getConnection(  
+"jdbc:oracle:thin:@localhost:1521:xe","system","oracle");  
+DatabaseMetaData dbmd=con.getMetaData();  
+  
+System.out.println("Driver Name: "+dbmd.getDriverName());  
+System.out.println("Driver Version: "+dbmd.getDriverVersion());  
+*/
+
+==================================================
+To store and retreive image in oracle database:
+
+You can store images in the database in java by the help of PreparedStatement interface.
+The setBinaryStream() method of PreparedStatement is used to set Binary information into the parameterIndex.
+Example:
+FileInputStream fin=new FileInputStream("d:\\g.jpg");  
+ps.setBinaryStream(2,fin,fin.available());  
+
+
+The getBlob() method of PreparedStatement is used to get Binary information, it returns the instance of Blob. After calling the getBytes() method on the blob object, we can get the array of binary information that can be written into the image file
+
+Example:
+PreparedStatement ps=con.prepareStatement("select * from imgtable");  
+ResultSet rs=ps.executeQuery();  
+if(rs.next()){//now on 1st row  
+              
+Blob b=rs.getBlob(2);//2 means 2nd column data  
+byte barr[]=b.getBytes(1,(int)b.length());//1 means first image  
+              
+FileOutputStream fout=new FileOutputStream("d:\\sonoo.jpg");  
+fout.write(barr);  
+              
+fout.close();  
+}
+===================================================
+CLOB(Character Large Object)=> for File 
+File f=new File("d:\\myfile.txt");  
+FileReader fr=new FileReader(f);  
+ps.setCharacterStream(2,fr,(int)f.length()); 
+
+
+//retrieve 
+Clob c=rs.getClob(2);  
+Reader r=c.getCharacterStream();              
+              
+FileWriter fw=new FileWriter("d:\\retrivefile.txt");  
+              
+int i;  
+while((i=r.read())!=-1)  
+fw.write((char)i);  
+              
+fw.close();  
+con.close();
+
+
+BLOb(Binary Large Object)=> for Image
+
+=================================================
+Java CallableStatement Interface
+
+CallableStatement interface is used to call the stored procedures and functions.
+We can have business logic on the database by the use of stored procedures and functions that will make the performance better because these are precompiled.
+Example:
+CallableStatement stmt=con.prepareCall("{?= call sum4(?,?)}");  
+stmt.setInt(2,10);  
+stmt.setInt(3,43);  
+stmt.registerOutParameter(1,Types.INTEGER);  
+stmt.execute();  
+
+===================================================
+Transaction Management in JDBC
+
+The ACID properties describes the transaction management well. ACID stands for Atomicity, Consistency, isolation and durability.
+Atomicity means either all successful or none.
+Consistency ensures bringing the database from one consistent state to another consistent state.
+Isolation ensures that transaction is isolated from other transaction.
+Durability means once a transaction has been committed, it will remain so, even in the event of errors, power loss etc.
+
+Property 		Responsibility for maintaining properties 
+Atomicity 		Transaction Manager
+Consistency 	Application programmer
+Isolation 		Concurrency Control Manager
+Durability 		Recovery Manager 
+
+====================================================
+What is JDBC Driver?
+JDBC Driver is a software component that enables java application to interact with the database. There are 4 types of JDBC drivers:
+
+JDBC-ODBC bridge driver
+Native-API driver (partially java driver)
+Network Protocol driver (fully java driver)
+Thin driver (fully java driver)
+
+===================================================
+Commonly used methods of Statement interface:
+The important methods of Statement interface are as follows:
+
+1) public ResultSet executeQuery(String sql): is used to execute SELECT query. It returns the object of ResultSet.
+2) public int executeUpdate(String sql): is used to execute specified query, it may be create, drop, insert, update, delete etc.
+3) public boolean execute(String sql): is used to execute queries that may return multiple results.
+4) public int[] executeBatch(): is used to execute batch of commands.
+
+=================================================
+What is JDBC Connection interface?
+The Connection interface maintains a session with the database. It can be used for transaction management. It provides factory methods that returns the instance of Statement, PreparedStatement, CallableStatement and DatabaseMetaData
+
+=================================================
+What is the role of JDBC DriverManager class?
+The DriverManager class manages the registered drivers. It can be used to register and unregister drivers. It provides factory method that returns the instance of Connection.
+
+==================================================
+What do you understand by JDBC Statements?
+JDBC statements are basically the statements which are used to send SQL commands to the database and retrieve data back from the database. Various methods like execute(), executeUpdate(), executeQuery, etc. are provided by JDBC to interact with the database.
+
+JDBC supports 3 types of statements:
+
+Statement: Used for general purpose access to the database and executes a static SQL query at runtime.
+PreparedStatement: The PreparedStatement interface is a subinterface of Statement. It is used to execute parameterized query.
+CallableStatement: CallableStatement interface is used to call the stored procedures and functions.
+
+===============================================
+
+try{  
+Class.forName("com.mysql.jdbc.Driver");  
+Connection con=DriverManager.getConnection(  
+"jdbc:mysql://localhost:3306/sonoo","root","root");  
+//here sonoo is database name, root is username and password  
+Statement stmt=con.createStatement();  
+ResultSet rs=stmt.executeQuery("select * from emp");  
+while(rs.next())  
+System.out.println(rs.getInt(1)+"  "+rs.getString(2)+"  "+rs.getString(3));  
+con.close();  
+}catch(Exception e){ System.out.println(e);}  
+} 

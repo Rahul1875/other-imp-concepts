@@ -1,0 +1,152 @@
+Cassandra:
+======================
+
+Q: What is a NoSQL Database?
+---------------------------------
+NoSQL is also referred as Not only SQL to emphasize that they may support SQL-like query language used in relational database.
+NoSQL database provides a mechanism to store and retrieve data, which are modeled rather than the tabular relations used in Relational databases.
+
+
+Q: What are the different types of NoSQL Databases?
+---------------------------------
+There are majorly 4 types of NoSQL Databases,
+
+1. Key Value Store: All of the data within database consists of an indexed key and a value. A key may correspond to one or multiple values (hash table). Provides a great performance and can be very easily scaled as per business needs. Ex: Redis,  DynamoDB
+
+2. Document Store: The data record is the JSON/XML representation of key-value pairs. Every record can have a different set of fields.
+Document DBs are similar to Key-value pairs, But the difference is that the key is associated with a document. Ex: MangoDB, CouchDB
+
+3. Column Store: Data is stored in cells are grouped in columns of data rather than as rows of data. Columns are logically grouped into column families. One row may have one or multiple data records, which is indexed by a partition key. Ex: Cassnadra, Apache HBASE
+
+4. Graph Databases: The type of NoSQL database in which a flexible graphical representation is used. The key purpose is to store relationships between nodes. Ex: neo4j
+
+Q:  What is Apache Cassandra ?
+----------------------------------
+Apache Cassandra is a free and open-source distributed NoSQL database management system designed to handle large amounts of data across many commodity servers, providing high availability with no single point of failure.
+Features: elastic Scalability, HA & Fault tolerant, Easy Data Distribution
+
+There are majorly 3 types/stages of Data Model
+    1. Conceptual Data Model  -> Semantics of Schema model
+    2. Logical Data Model  -> Entities, Attributes, Relationships, Integrity Rules
+    2. Physical Data Model  -> Tables, Columns, Keys, Triggers
+	
+There are 4 main Cassandra Database Elements:
+
+1. Clusters: The outermost structure in Cassandra is the cluster. A cluster is a container for Keyspaces. Sometimes called the ring, because Cassandra assigns data to nodes in the cluster by arranging them in a ring
+
+2. Keyspace: A keyspace is the outermost container for data in Cassandra. Like a relational database, a keyspace has a name and a set of attributes that define keyspace-wide behaviour. The keyspace is used to group Column families together.
+
+CREATE KEYSPACE <keyspace-name>
+WITH replication = { ‘class ’: ‘<Replication Strategy>’, ‘replication_factor’: ‘3’}
+AND durable_writes = ‘TRUE’;
+
+-> Durable Writes provides a means to instruct Cassandra whether to use commitlog for updates on the current KeySpace or not.
+
+->The replica placement strategy refers to how the replicas will be placed in the ring. There are different strategies that ship with Cassandra for determining which nodes will get copies of which keys. There are mainly two types of Strategies:
+(i). Simple Strategy
+(ii). Network Topology Strategy
+
+3. Column Family: A Column Family in Cassandra is like a table where each row can have different columns, optimized for fast and scalable data storage. 
+
+4. CQL Table : Tables in CQL. Cassandra-Cqlsh is a query language that enables users to communicate with its database
+
+Q: What is a Primary Key? And what are it’s different types?
+----------------------------------------------
+
+A primary key is a unique identifier for each record (row) in a database table. The primary key can also be COMPOSITE (aka COMPOUND), generated from more columns.
+
+ create table stackoverflow_composite (
+      key_part_one text,
+      key_part_two int,
+      data text,
+      PRIMARY KEY(key_part_one, key_part_two)      
+  );
+  
+In a situation of COMPOSITE primary key, the "first part" of the key is called PARTITION KEY (in this example key_part_one is the partition key) and the second part of the key is the CLUSTERING KEY (in this example key_part_two). Please note that both partition and clustering key can be made by more columns.
+
+The Partition Key is responsible for data distribution across your nodes.
+The Clustering Key is responsible for data sorting within the partition. Retrieval of rows is very efficient when rows for a partition key are stored in order, based on the clustering column.
+The Primary Key is equivalent to the Partition Key in a single-field-key table (i.e. Simple). 
+
+eg: PRIMARY KEY((col1, col2), col10, col4))
+You can perform query only by passing at least both col1 and col2, these are the 2 columns that define the partition key. The "general" rule to make query is you must pass at least all partition key columns, then you can add optionally each clustering key in the order they're set.
+
+so, the valid queries are (excluding secondary indexes)
+col1 and col2
+col1 and col2 and col10
+col1 and col2 and col10 and col 4
+
+Invalid:
+col1 and col2 and col4
+anything that does not contain both col1 and col2
+
+https://stackoverflow.com/questions/24949676/difference-between-partition-key-composite-key-and-clustering-key-in-cassandra
+
+
+Q: What is Gossip Protocol?
+--------------------------------
+Gossip Protocol in Cassandra is a peer-to-peer communication protocol in which nodes can choose among themselves with whom they want to exchange their state information. The nodes exchange information about themselves and about the other nodes that they have gossiped about, so all nodes quickly learn about all other nodes in the cluster. 
+
+
+Q: What are partitions and Tokens in Cassandra?
+-----------------------------------------------------
+Partition: A partition in Cassandra is a set of rows identified by the same partition key and stored together for fast access.
+
+Token: Integer value generated by a hashing algorithm, identifying a partition’s location within a cluster.
+
+Different types of Partitioners in Cassandra-
+
+1. Murmur3Partitioner: is the default partitioner. It is both improved and faster than RandomPartitioner. Uniformly distributes data based on MurmurHash function.
+
+2. RandomPartitioner: was the default partitioner prior to Cassandra 1.2. It is used with vnodes. It has a Uniform Distribution.
+
+3. ByteOrderedPartioner: is used for ordered partitioning. Using the ordered partitioner allows ordered scans by primary key.
+
+
+Q: What do you mean by Snitch? Name a few
+--------------------------------------------
+A snitch determines which datacenters and racks, nodes belong to. They inform Cassandra about the network topology and allows Cassandra to distribute replicas specifically, the Replication strategy.
+Ex: Dynamic snitching, SimpleSnitch, GoogleCloudSnitch
+
+Q: How does Cassandra perform write operations?
+------------------------------------------------
+
+When write request comes to the node:
+Firstly, it logs in the Commit Log. Data will be captured and stored in the Mem-Table. When mem-table is full, data is flushed to the SSTable data file. All writes are automatically partitioned and replicated throughout the cluster Cassandra periodically consolidates the SSTables, discarding unnecessary data.
+
+Commit log: The Commit log is a crash-recovery mechanism that supports Cassandra’s durability goals.
+MemTable: MemTable is an in-memory data structure that corresponds to a CQL table
+SSTable: The contents of the memtable are flushed to disk in a file called an SSTable.
+
+
+Q: What is the use of Coordinator Node in Read?
+--------------------------------------------------
+Read Operation is easy because clients can connect to any node in the cluster to perform reads. If a client connects to a node that doesn’t have the data it’s trying to read, the node it’s connected to will act as the coordinator node.
+
+
+Ques: diference between keyspace and table in cassandra?
+----------------------------------------------------------------
+Think of Cassandra like a house 🏠
+Keyspace → the house
+Table → the rooms inside the house
+Data → the things kept in each room
+
+🔑 What is a Keyspace?: A Keyspace is the top-level container in Cassandra.
+It defines:
+Replication strategy (how data is copied)
+Replication factor (how many copies of data)
+Durability & availability rules
+📌 Similar to a database/schema in SQL
+
+CREATE KEYSPACE ecommerce
+WITH replication = {
+  'class': 'SimpleStrategy',
+  'replication_factor': 3
+};
+
+Relationship:
+Cluster
+ └── Keyspace
+      ├── Table 1
+      ├── Table 2
+      └── Table 3
